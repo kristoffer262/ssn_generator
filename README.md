@@ -1,2 +1,2 @@
-# ssn_generator
+# SSN_GENERATOR
 Generator for swedish Social Security Numbers
