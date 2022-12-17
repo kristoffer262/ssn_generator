@@ -10,7 +10,8 @@ class GENERATE_SSN:
 
     Sources of information:
     https://skatteverket.se/privat/folkbokforing/personnummerochsamordningsnummer.4.3810a01c150939e893f18c29.html
-    https://sv.wikipedia.org/wiki/Personnummer_i_Sverige        
+    https://sv.wikipedia.org/wiki/Personnummer_i_Sverige
+    https://www.scb.se/hitta-statistik/sverige-i-siffror/namnsok/
     """
     
     def __init__(self):
