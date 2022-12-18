@@ -1,4 +1,4 @@
-from random import choice, randint
+from random import choice, choices, randint
 from datetime import date, timedelta
 import pandas as pd
 
@@ -33,7 +33,38 @@ class GENERATE_PERSONS:
                             80: 0.15, 
                             90: 0.1, 
                             00: 0.1} # Distribution of SSNs per decade of birth
+        self.names = self.load_names()
 
+
+    def get_persons(self):
+        """
+        Takes self.counts and generates persons with SSN and firstname, lastname
+        from the input distribution of names in Sweden.
+        Return set of persons with SSNs.
+        """
+
+        persons = {}
+        for ssn in self.get_ssns():
+            woman = int(ssn[-2])%2
+            firstname, lastname = self.get_random_name(woman)
+            persons[ssn] = {"firstname": firstname,
+                            "lastname": lastname,
+                            "first_and_lastname": f"{firstname} {lastname}"}
+        return persons
+
+
+    def get_random_name(self, woman):
+        """
+        Takes input woman True(1)/False(0), and fetches a first- and lastname.
+        Returns first- and lastname
+        """
+        
+        if woman:
+            firstname = choices(self.names["firstnames_woman"][0], weights=self.names["firstnames_woman"][1], k=1)[0]
+        else:
+            firstname = choices(self.names["firstnames_men"][0], weights=self.names["firstnames_men"][1], k=1)[0]
+        lastname = choices(self.names["lastnames"][0], weights=self.names["lastnames"][1], k=1)[0]
+        return firstname, lastname
 
     def get_ssns(self):
         """
@@ -41,7 +72,7 @@ class GENERATE_PERSONS:
         Return set of SSNs, to not provide duplicates.
         """
 
-        dist_counts = self.get_distribution_counts()
+        dist_counts = self.get_decade_distribution_counts()
         ssns = []
         for decade, decades in dist_counts["decade"].items():
             for sex, sex_counts in decades.items():
@@ -49,7 +80,7 @@ class GENERATE_PERSONS:
         return set(ssns)
 
 
-    def get_distribution_counts(self):
+    def get_decade_distribution_counts(self):
         """
         Takes the distribution input and creates a dictionary with corresponding
         number of SSNs to create for each part.
@@ -70,6 +101,12 @@ class GENERATE_PERSONS:
 
 
     def load_names(self):
+        """
+        Loads common last- and firstnames together with number of occurances in 
+        Sweden according to SCB. Source https://www.scb.se/hitta-statistik/sverige-i-siffror/namnsok/.
+        Return dictionary with lists of values.
+        """
+        
         names = {"lastnames": [], 
                 "firstnames_men": [],
                 "firstnames_woman": []}
@@ -77,14 +114,12 @@ class GENERATE_PERSONS:
         df_lastnames = pd.read_excel("namn-2021_20220404.xlsx", "Efternamn")
         df_men = pd.read_excel("namn-2021_20220404.xlsx", "Tilltalsnamn_men")
         df_woman = pd.read_excel("namn-2021_20220404.xlsx", "Tilltalsnamn_woman")
-        
         names["lastnames"].append(df_lastnames["Efternamn"].to_list())
         names["lastnames"].append(df_lastnames["Antal"].to_list())
         names["firstnames_men"].append(df_men["Tilltalsnamn"].to_list())
         names["firstnames_men"].append(df_men["Antal"].to_list())
         names["firstnames_woman"].append(df_woman["Tilltalsnamn"].to_list())
         names["firstnames_woman"].append(df_woman["Antal"].to_list())
-
         return names 
 
     def get_one_ssn(self, sex, decade):
@@ -151,4 +186,6 @@ ssn.counts = 100
     
 #ssns = ssn.get_ssns()
 #print(ssns)
-print(ssn.load_names())
+#print(ssn.load_names())
+persons = ssn.get_persons()
+print(persons)
